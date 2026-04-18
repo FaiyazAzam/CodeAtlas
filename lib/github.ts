@@ -31,6 +31,13 @@ type GitHubBranchResponse = {
   };
 };
 
+export class InvalidGitHubRepoUrlError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidGitHubRepoUrlError";
+  }
+}
+
 export function parseGitHubUrl(repoUrl: string): { owner: string; repo: string } | null {
   try {
     const url = new URL(repoUrl.trim());
@@ -49,11 +56,33 @@ export function parseGitHubUrl(repoUrl: string): { owner: string; repo: string }
   }
 }
 
+export function getGitHubRepoUrlError(repoUrl: string): string | null {
+  try {
+    const url = new URL(repoUrl.trim());
+    if (url.hostname !== "github.com" && url.hostname !== "www.github.com") {
+      return "Enter a valid public GitHub repository URL.";
+    }
+
+    const parts = url.pathname.split("/").filter(Boolean);
+    if (parts.length === 1) {
+      return "This looks like a GitHub profile or organization link, not a repository link. Paste a repo URL like https://github.com/owner/repository.";
+    }
+
+    if (parts.length < 2) {
+      return "A GitHub repository URL must include both the owner and repository name. Example: https://github.com/vercel/next.js.";
+    }
+
+    return null;
+  } catch {
+    return "Enter a valid public GitHub repository URL.";
+  }
+}
+
 export async function fetchRepository(repoUrl: string): Promise<{ repo: RepoMeta; files: RepoFile[] }> {
   const timeouts = getTimeoutConfig();
   const parsed = parseGitHubUrl(repoUrl);
   if (!parsed) {
-    throw new Error("Enter a valid public GitHub repository URL.");
+    throw new InvalidGitHubRepoUrlError(getGitHubRepoUrlError(repoUrl) ?? "Enter a valid public GitHub repository URL.");
   }
 
   const headers: HeadersInit = {

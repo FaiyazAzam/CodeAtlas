@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { analyzeRepository } from "../lib/analyzer";
-import { parseGitHubUrl } from "../lib/github";
+import { getGitHubRepoUrlError, parseGitHubUrl } from "../lib/github";
 import { selectFilesForContent, type TreeScanResult } from "../lib/llmAnalysis";
 import type { RepoFile, RepoMeta } from "../types/analysis";
 
@@ -34,6 +34,13 @@ describe("parseGitHubUrl", () => {
       owner: "demo",
       repo: "example"
     });
+  });
+
+  it("explains when a GitHub URL is a profile or organization instead of a repo", () => {
+    expect(parseGitHubUrl("https://github.com/Trivian-Technologies")).toBeNull();
+    expect(getGitHubRepoUrlError("https://github.com/Trivian-Technologies")).toBe(
+      "This looks like a GitHub profile or organization link, not a repository link. Paste a repo URL like https://github.com/owner/repository."
+    );
   });
 });
 

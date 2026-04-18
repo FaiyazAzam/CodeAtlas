@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { analyzeRepository } from "@/lib/analyzer";
 import { buildAnalysisCacheKey, isAnalysisCacheEnabled, readCachedAnalysis, writeCachedAnalysis } from "@/lib/cache";
-import { fetchRepository } from "@/lib/github";
+import { fetchRepository, InvalidGitHubRepoUrlError } from "@/lib/github";
 import { enhanceAnalysisWithLLM, hasLlmConfig } from "@/lib/llmAnalysis";
 import { checkLlmRateLimit, checkRateLimit, getClientIdentifier, llmRateLimitHeaders, rateLimitHeaders } from "@/lib/rateLimit";
 import { getTimeoutConfig, withTimeout } from "@/lib/timeouts";
@@ -99,6 +99,10 @@ export async function POST(request: Request) {
 
       return NextResponse.json({ analysis }, { headers });
     } catch (error) {
+      if (error instanceof InvalidGitHubRepoUrlError) {
+        return NextResponse.json({ error: error.message }, { status: 400, headers });
+      }
+
       const fallback = getFallbackAnalysis(repoUrl);
       return NextResponse.json(
         {
