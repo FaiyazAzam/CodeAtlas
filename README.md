@@ -2,6 +2,8 @@
 
 CodeAtlas is a polished MVP developer tool for understanding unfamiliar GitHub repositories quickly. Paste a public repo URL and get a visual architecture map, repo explorer, module summaries, inferred entry points, likely data flow, dependencies, and a newcomer reading guide.
 
+![CodeAtlas app preview](docs/codeatlas-preview.png)
+
 ## Live App
 
 CodeAtlas is live at:
