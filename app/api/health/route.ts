@@ -60,7 +60,7 @@ function isAuthorized(request: Request): boolean {
     return process.env.NODE_ENV !== "production";
   }
 
-  const provided = request.headers.get("x-codeatlas-health-token") || new URL(request.url).searchParams.get("token");
+  const provided = request.headers.get("x-codeatlas-health-token");
   return provided === expected;
 }
 
